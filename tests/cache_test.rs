@@ -19,6 +19,9 @@ mod tests {
         println!("narcissistic without cache: {:?}", difference);
     }
 
+    //Vec<[usize;10]> a little bit quick
+    //Vec<Vec[usize]>> slower
+
     #[test]
     fn with_cache() {
         let narcissistic = CachedNarcissisticIterator::new();

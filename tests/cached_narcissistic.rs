@@ -4,7 +4,7 @@ pub struct CachedNarcissisticIterator {
     index: ListedNumber,
     digit: u32,
     digit_mark: usize,
-    cache: Vec<Vec<usize>>,
+    cache: Vec<[usize; 10]>,
 }
 
 impl CachedNarcissisticIterator {
@@ -28,16 +28,16 @@ impl Iterator for CachedNarcissisticIterator {
                 let power = self.digit + 1;
                 self.digit = power;
                 self.digit_mark = 10_usize.pow(self.digit);
-                let mut vec = Vec::new();
+                let mut arr = [0_usize; 10];
                 for i in 0_usize..10 {
-                    vec.push(i.pow(power));
+                    arr[i] = i.pow(power);
                 }
-                self.cache.push(vec);
+                self.cache.push(arr);
             }
             let cache_index = (self.digit - 1) as usize;
-            let cache = self.cache.get(cache_index).expect("Unknown size");
+            let cache = self.cache.get(cache_index).unwrap();
             let power_sum_value = self.index.vec().iter()
-                .map(|x| cache.get(*x).unwrap())
+                .map(|x| cache[*x])
                 .sum();
             self.index.plus_one();
             if power_sum_value == value {
