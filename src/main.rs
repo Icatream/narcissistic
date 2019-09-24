@@ -19,6 +19,6 @@ fn main() {
     match n {
         Some(n) => narcissistic.take(n)
             .for_each(action),
-        None => narcissistic.take(27).for_each(action)
+        None => narcissistic.for_each(action)
     }
 }

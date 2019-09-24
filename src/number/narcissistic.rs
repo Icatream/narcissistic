@@ -1,3 +1,5 @@
+use std::usize::MAX;
+
 use crate::number::listed::ListedNumber;
 
 pub struct NarcissisticIterator {
@@ -22,6 +24,9 @@ impl Iterator for NarcissisticIterator {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             let value = self.index.value();
+            if value == MAX {
+                return None;
+            }
             if value == self.digit_mark {
                 self.digit = self.digit + 1;
                 self.digit_mark = 10_usize.pow(self.digit);
