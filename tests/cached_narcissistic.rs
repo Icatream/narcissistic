@@ -1,3 +1,5 @@
+use std::usize::MAX;
+
 use narcissistic::number::listed::ListedNumber;
 
 pub struct CachedNarcissisticIterator {
@@ -24,6 +26,9 @@ impl Iterator for CachedNarcissisticIterator {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             let value = self.index.value();
+            if value == MAX {
+                return None;
+            }
             if value == self.digit_mark {
                 let power = self.digit + 1;
                 self.digit = power;
