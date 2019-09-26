@@ -31,7 +31,7 @@ impl Iterator for NarcissisticIterator {
                 self.digit = self.digit + 1;
                 self.digit_mark = 10_usize.pow(self.digit);
             }
-            let power_sum_value = self.index.vec.iter()
+            let power_sum_value = self.index.vec().iter()
                 .map(|x| (*x).pow(self.digit))
                 .sum();
             self.index.plus_one();

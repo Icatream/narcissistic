@@ -41,7 +41,7 @@ impl Iterator for CachedNarcissisticIterator {
             }
             let cache_index = (self.digit - 1) as usize;
             let cache = self.cache.get(cache_index).unwrap();
-            let power_sum_value = self.index.vec.iter()
+            let power_sum_value = self.index.vec().iter()
                 .map(|x| cache[*x])
                 .sum();
             self.index.plus_one();
