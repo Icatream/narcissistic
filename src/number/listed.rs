@@ -1,8 +1,6 @@
-use std::fmt;
-
 #[derive(Debug)]
 pub struct ListedNumber {
-    vec: Vec<usize>,
+    pub vec: Vec<usize>,
 }
 
 impl ListedNumber {
@@ -53,10 +51,6 @@ impl ListedNumber {
             .enumerate()
             .map(|(i, v)| 10_usize.pow(i as u32) * v)
             .sum()
-    }
-
-    pub fn vec(&self) -> &Vec<usize> {
-        self.vec.as_ref()
     }
 
     /*pub fn number_of_digit(&self, digit: usize) -> Option<usize> {
