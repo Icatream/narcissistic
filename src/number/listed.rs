@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
 use std::fmt;
 
+#[derive(Debug)]
 pub struct ListedNumber {
     vec: Vec<usize>,
 }
@@ -65,8 +65,9 @@ impl ListedNumber {
     }*/
 }
 
+/*
 impl Display for ListedNumber {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.vec)
     }
-}
+}*/
