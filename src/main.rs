@@ -1,6 +1,6 @@
 use std::env::args;
 
-use crate::number::narcissistic::NarcissisticIterator;
+use crate::number::cached_narcissistic::CachedNarcissisticIterator;
 
 pub mod number;
 
@@ -14,7 +14,7 @@ fn main() {
                 Err(_) => None
             }
         });
-    let narcissistic = NarcissisticIterator::new();
+    let narcissistic = CachedNarcissisticIterator::new();
     let action = |i: usize| println!("{}", i);
     match n {
         Some(n) => narcissistic.take(n)
