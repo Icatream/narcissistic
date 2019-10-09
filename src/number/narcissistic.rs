@@ -1,6 +1,6 @@
 use std::usize::MAX;
 
-use crate::number::listed::{LinkedNumber, Node};
+use crate::number::linkednumber::{LinkedNumber, Node};
 
 pub struct NarcissisticIterator {
     index: LinkedNumber,

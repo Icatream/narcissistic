@@ -1,6 +1,6 @@
 use std::usize::MAX;
 
-use narcissistic::number::listed::LinkedNumber;
+use narcissistic::number::linkednumber::LinkedNumber;
 
 pub struct CachedNarcissisticIterator {
     index: LinkedNumber,

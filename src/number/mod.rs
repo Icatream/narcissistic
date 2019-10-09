@@ -1,2 +1,2 @@
-pub mod listed;
+pub mod linkednumber;
 pub mod narcissistic;
