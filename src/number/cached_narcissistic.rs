@@ -33,11 +33,9 @@ impl Iterator for CachedNarcissisticIterator {
                 let power = self.digit + 1;
                 self.digit = power;
                 self.digit_mark = 10_usize.pow(self.digit);
-                let mut arr = [0_usize; 10];
                 for i in 0_usize..10 {
-                    arr[i] = i.pow(power);
+                    self.cache[i] = i.pow(power);
                 }
-                self.cache = arr;
             }
             let mut sum = 0;
             let mut node = &self.index.head;
