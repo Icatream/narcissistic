@@ -1,9 +1,9 @@
 use std::usize::MAX;
 
-use crate::number::listed::ListedNumber;
+use crate::number::listed::{LinkedNumber, Node};
 
 pub struct NarcissisticIterator {
-    index: ListedNumber,
+    index: LinkedNumber,
     digit: u32,
     digit_mark: usize,
 }
@@ -11,9 +11,18 @@ pub struct NarcissisticIterator {
 impl NarcissisticIterator {
     pub fn new() -> NarcissisticIterator {
         NarcissisticIterator {
-            index: ListedNumber::new(0),
+            index: LinkedNumber::new(0),
             digit: 0,
             digit_mark: 0,
+        }
+    }
+}
+
+impl Node {
+    fn sum_power_of_each_num(&self, exp: u32, sum: usize) -> usize {
+        match self.next {
+            Some(ref node) => node.sum_power_of_each_num(exp, sum + self.val.pow(exp)),
+            None => sum + self.val.pow(exp),
         }
     }
 }
@@ -23,7 +32,7 @@ impl Iterator for NarcissisticIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let value = self.index.value();
+            let value = self.index.val;
             if value == MAX {
                 return None;
             }
@@ -31,12 +40,10 @@ impl Iterator for NarcissisticIterator {
                 self.digit = self.digit + 1;
                 self.digit_mark = 10_usize.pow(self.digit);
             }
-            let power_sum_value = self.index.vec().iter()
-                .map(|x| (*x).pow(self.digit))
-                .sum();
+            let sum = self.index.head.sum_power_of_each_num(self.digit, 0);
             self.index.plus_one();
-            if power_sum_value == value {
-                return Some(power_sum_value);
+            if sum == value {
+                return Some(sum);
             }
         }
     }

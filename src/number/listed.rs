@@ -1,71 +1,69 @@
+use std::borrow::BorrowMut;
+
 #[derive(Debug)]
-pub struct ListedNumber {
-    vec: Vec<usize>,
+pub struct LinkedNumber {
+    pub val: usize,
+    pub head: Node,
 }
 
-impl ListedNumber {
-    pub fn new(i: usize) -> ListedNumber {
-        let mut vec: Vec<usize> = Vec::new();
-        if i == 0 {
-            vec.push(0);
-        } else {
-            let mut i = i;
-            while i != 0 {
-                let j = i / 10;
-                if j != 0 {
-                    vec.push(i - j * 10);
-                    i = j;
-                } else {
-                    vec.push(i);
-                    break;
-                }
-            }
-        }
-        ListedNumber { vec }
+#[derive(Debug)]
+pub struct Node {
+    pub val: usize,
+    pub next: Option<Box<Node>>,
+}
+
+impl LinkedNumber {
+    pub fn new(val: usize) -> LinkedNumber {
+        let head = Node::new(val);
+        LinkedNumber { val, head }
     }
 
     pub fn plus_one(&mut self) {
-        self.plus_one_0(0);
+        self.val += 1;
+        self.head.plus_one();
     }
+}
 
-    fn plus_one_0(&mut self, index: usize) {
-        match self.vec.get(index) {
-            Some(v) => {
-                let v = *v + 1;
-                if v < 10 {
-                    self.vec[index] = v;
-                } else {
-                    let x = v - 10;
-                    self.vec[index] = x;
-                    self.plus_one_0(index + 1);
-                }
-            }
-            None => {
-                self.vec.push(1);
+impl Node {
+    fn new(i: usize) -> Node {
+        let j = i / 10;
+        if j != 0 {
+            let val = i - j * 10;
+            let mut head = Node { val, next: None };
+            Node::new0(j, &mut head);
+            head
+        } else {
+            Node {
+                val: i,
+                next: None,
             }
         }
     }
 
-    pub fn value(&self) -> usize {
-        self.vec.iter()
-            .enumerate()
-            .map(|(i, v)| 10_usize.pow(i as u32) * v)
-            .sum()
+    fn new0(i: usize, prev: &mut Node) {
+        let j = i / 10;
+        if j != 0 {
+            let val = i - j * 10;
+            let node = Box::new(Node { val, next: None });
+            prev.next = Some(node);
+            if let Some(ref mut next) = prev.next {
+                Node::new0(j, next);
+            }
+        } else {
+            prev.next.replace(Box::new(Node { val: i, next: None }));
+        }
     }
 
-    pub fn vec(&self) -> &Vec<usize> {
-        self.vec.as_ref()
+    fn plus_one(&mut self) {
+        let i = self.val + 1;
+        if i == 10 {
+            self.val = 0;
+            match self.next {
+                Some(ref mut next) => Node::plus_one(next.borrow_mut()),
+                None => self.next = Some(Box::new(Node { val: 1, next: None })),
+            }
+        } else {
+            self.val = i;
+        }
     }
-
-    /*pub fn number_of_digit(&self, digit: usize) -> Option<usize> {
-        self.vec.get(digit - 1)
-            .map(|x| *x)
-    }*/
 }
-
-/*
-impl Display for ListedNumber {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self.vec)
-    }
-}*/

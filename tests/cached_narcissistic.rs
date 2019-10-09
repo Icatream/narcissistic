@@ -1,21 +1,21 @@
 use std::usize::MAX;
 
-use narcissistic::number::listed::ListedNumber;
+use narcissistic::number::listed::LinkedNumber;
 
 pub struct CachedNarcissisticIterator {
-    index: ListedNumber,
+    index: LinkedNumber,
     digit: u32,
     digit_mark: usize,
-    cache: Vec<[usize; 10]>,
+    cache: [usize; 10],
 }
 
 impl CachedNarcissisticIterator {
     pub fn new() -> CachedNarcissisticIterator {
         CachedNarcissisticIterator {
-            index: ListedNumber::new(0),
+            index: LinkedNumber::new(0),
             digit: 0,
             digit_mark: 0,
-            cache: vec![],
+            cache: [0; 10],
         }
     }
 }
@@ -25,7 +25,7 @@ impl Iterator for CachedNarcissisticIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let value = self.index.value();
+            let value = self.index.val;
             if value == MAX {
                 return None;
             }
@@ -37,16 +37,25 @@ impl Iterator for CachedNarcissisticIterator {
                 for i in 0_usize..10 {
                     arr[i] = i.pow(power);
                 }
-                self.cache.push(arr);
+                self.cache = arr;
             }
-            let cache_index = (self.digit - 1) as usize;
-            let cache = self.cache.get(cache_index).unwrap();
-            let power_sum_value = self.index.vec().iter()
-                .map(|x| cache[*x])
-                .sum();
+            let mut sum = 0;
+            let mut node = &self.index.head;
+            loop {
+                match node.next {
+                    Some(ref next) => {
+                        sum = sum + self.cache[node.val];
+                        node = next;
+                    }
+                    None => {
+                        sum = sum + self.cache[node.val];
+                        break;
+                    }
+                }
+            }
             self.index.plus_one();
-            if power_sum_value == value {
-                return Some(power_sum_value);
+            if sum == value {
+                return Some(sum);
             }
         }
     }
