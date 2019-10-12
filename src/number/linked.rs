@@ -25,7 +25,7 @@ impl LinkedNumber {
 }
 
 impl Node {
-    fn new(i: usize) -> Node {
+    pub fn new(i: usize) -> Node {
         let j = i / 10;
         if j != 0 {
             let val = i - j * 10;
@@ -64,6 +64,110 @@ impl Node {
             }
         } else {
             self.val = i;
+        }
+    }
+
+    pub fn _reverse(self) -> Box<Node> {
+        let mut prev = None;
+        let mut curr = Box::new(self);
+        loop {
+            let next = curr.next.take();
+            curr.next = prev;
+            match next {
+                Some(next_node) => {
+                    prev = Some(curr);
+                    curr = next_node;
+                }
+                None => return curr,
+            }
+        }
+    }
+
+    pub fn _reverse_at(self, k: usize) -> Box<Node> {
+        //let v = self.val as f64;
+        //let length = (v.log10() as usize) + 1;
+        //assert!(length > k, "reverse position can't be bigger than node length");
+
+        /*let mut first_node = Box::new(self);
+        match first_node.next.take() {
+            Some(mut second_node) => {
+                let mut first_node = Some(first_node);
+                let third = second_node.next.take();
+                second_node.next = first_node;
+                let first_part_tail = &mut second_node.next;
+                match third {
+                    Some(third_node) => {
+                        let mut prev = Some(second_node);
+                        let mut curr = third_node;
+                        let mut i: usize = 2;
+                        while i <= k {
+                            let next = curr.next.take();
+                            curr.next = prev;
+                            match next {
+                                Some(next_node) => {
+                                    prev = Some(curr);
+                                    curr = next_node;
+                                }
+                                None => return curr,
+                            }
+                            i += 1;
+                        }
+                        let head = prev.unwrap();
+                        prev = None;
+                        loop {
+                            let next = curr.next.take();
+                            curr.next = prev;
+                            match next {
+                                Some(next_node) => {
+                                    prev = Some(curr);
+                                    curr = next_node;
+                                }
+                                None => {
+                                    first_part_tail.unwrap().next = Some(curr);
+                                    return head;
+                                }
+                            }
+                        }
+                    }
+                    None => return second_node,
+                }
+            }
+            None => return first_node,
+        }*/
+        let mut prev = None;
+        let mut curr = Box::new(self);
+
+        let first_part_tail = &mut curr;
+
+        let mut i: usize = 0;
+        while i <= k {
+            let next = curr.next.take();
+            curr.next = prev;
+            match next {
+                Some(next_node) => {
+                    prev = Some(curr);
+                    curr = next_node;
+                }
+                None => return curr,
+            }
+            i += 1;
+        }
+
+        let head = prev.unwrap();
+        prev = None;
+        loop {
+            let next = curr.next.take();
+            curr.next = prev;
+            match next {
+                Some(next_node) => {
+                    prev = Some(curr);
+                    curr = next_node;
+                }
+                None => {
+                    first_part_tail.next = Some(curr);
+                    return head;
+                }
+            }
         }
     }
 }

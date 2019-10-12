@@ -1,11 +1,17 @@
 use std::env::args;
 
 use crate::number::cached_narcissistic::CachedNarcissisticIterator;
+use narcissistic::number::linked::Node;
 
 pub mod number;
 
 fn main() {
-    let n = args()
+    let node = Node::new(43210);
+    println!("{:?}", node);
+    let r_node = node._reverse_at(2);
+    println!("{:?}", r_node);
+
+   /* let n = args()
         .skip(1)
         .next()
         .and_then(|s| {
@@ -20,5 +26,5 @@ fn main() {
         Some(n) => narcissistic.take(n)
             .for_each(action),
         None => narcissistic.for_each(action)
-    }
+    }*/
 }
