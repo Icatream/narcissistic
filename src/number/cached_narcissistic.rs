@@ -10,7 +10,7 @@ pub struct CachedNarcissisticIterator {
 }
 
 impl CachedNarcissisticIterator {
-    pub fn new() -> CachedNarcissisticIterator {
+    pub fn new() -> Self {
         CachedNarcissisticIterator {
             index: LinkedNumber::new(0),
             digit: 0,

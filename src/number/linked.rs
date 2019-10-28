@@ -13,7 +13,7 @@ pub struct Node {
 }
 
 impl LinkedNumber {
-    pub fn new(val: usize) -> LinkedNumber {
+    pub fn new(val: usize) -> Self {
         let head = Node::new(val);
         LinkedNumber { val, head }
     }
@@ -25,7 +25,7 @@ impl LinkedNumber {
 }
 
 impl Node {
-    pub fn new(i: usize) -> Node {
+    pub fn new(i: usize) -> Self {
         let j = i / 10;
         if j != 0 {
             let val = i - j * 10;

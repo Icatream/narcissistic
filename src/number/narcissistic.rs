@@ -9,7 +9,7 @@ pub struct NarcissisticIterator {
 }
 
 impl NarcissisticIterator {
-    pub fn new() -> NarcissisticIterator {
+    pub fn new() -> Self {
         NarcissisticIterator {
             index: LinkedNumber::new(0),
             digit: 0,
