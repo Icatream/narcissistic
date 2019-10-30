@@ -12,4 +12,11 @@ mod tests {
         println!("{:?}", num);
         println!("{}", num.value());
     }
+
+    #[test]
+    fn reverse_at() {
+        let mut num = LinkedNumber::new(54321);
+        num.reverse_at(1);
+        println!("{:?}", num);
+    }
 }

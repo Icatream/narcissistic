@@ -71,34 +71,25 @@ impl LinkedNumber {
                 let head = ptr::read(raw_head);
                 let mut prev = Some(Box::new(head));
                 let mut curr = second;
-                let mut new_head: *mut Node = ptr::null_mut();
-                let mut middle_tail: *mut Node = ptr::null_mut();
-                if index == 0 {
-                    new_head = prev.as_mut().map(|node| &mut **node).unwrap();
-                    //new_head = &mut *prev.unwrap();
-                    middle_tail = new_head;
-                    while let Some(next) = curr.next.take() {
+                let mut new_head = None;
+                let mut i = 0;
+                while let Some(next) = curr.next.take() {
+                    if i == index {
+                        new_head = prev;
+                    } else {
                         curr.next = prev;
-                        prev = Some(curr);
-                        curr = next;
                     }
-                } else {
-                    let mut i = 1;
-                    while let Some(next) = curr.next.take() {
-                        if i == index {
-                            new_head = &mut *curr;
-                            middle_tail = prev.as_mut().map(|node| &mut **node).unwrap();
-                            curr = Box::from_raw(new_head);
-                        }
-                        curr.next = prev;
-                        prev = Some(curr);
-                        curr = next;
-                        i += 1;
-                    }
+                    prev = Some(curr);
+                    curr = next;
+                    i += 1;
                 }
                 curr.next = prev;
-                (*middle_tail).next = Some(curr);
-                self.head = ptr::read(new_head);
+                println!("Curr: {:?}", curr);
+                println!("Head: {:?}", ptr::read(raw_head));
+                ptr::read(raw_head).next = Some(curr);
+                println!("Head: {:?}", ptr::read(raw_head));
+                println!("New_head: {:?}", new_head);
+                self.head = *new_head.unwrap();
             }
         }
     }
