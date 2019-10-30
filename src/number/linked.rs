@@ -52,17 +52,12 @@ impl LinkedNumber {
                 let head = ptr::read(raw_head);
                 let mut prev = Some(Box::new(head));
                 let mut curr = second;
-                loop {
-                    let next = curr.next.take();
+                while let Some(next) = curr.next.take() {
                     curr.next = prev;
-                    match next {
-                        Some(next_node) => {
-                            prev = Some(curr);
-                            curr = next_node;
-                        }
-                        None => break
-                    }
+                    prev = Some(curr);
+                    curr = next;
                 }
+                curr.next = prev;
                 mem::replace(&mut self.head, *curr);
             }
             self.val = self.calculate_value();
