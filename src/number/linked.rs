@@ -64,6 +64,44 @@ impl LinkedNumber {
         }
     }
 
+    pub fn reverse_at(&mut self, index: usize) {
+        if let Some(second) = self.head.next.take() {
+            let raw_head: *const _ = &self.head;
+            unsafe {
+                let head = ptr::read(raw_head);
+                let mut prev = Some(Box::new(head));
+                let mut curr = second;
+                let mut new_head: *mut Node = ptr::null_mut();
+                let mut middle_tail: *mut Node = ptr::null_mut();
+                if index == 0 {
+                    new_head = prev.as_mut().map(|node| &mut **node).unwrap();
+                    //new_head = &mut *prev.unwrap();
+                    middle_tail = new_head;
+                    while let Some(next) = curr.next.take() {
+                        curr.next = prev;
+                        prev = Some(curr);
+                        curr = next;
+                    }
+                } else {
+                    let mut i = 1;
+                    while let Some(next) = curr.next.take() {
+                        if i == index {
+                            new_head = &mut *curr;
+                            middle_tail = prev.as_mut().map(|node| &mut **node).unwrap();
+                            curr = Box::from_raw(new_head);
+                        }
+                        curr.next = prev;
+                        prev = Some(curr);
+                        curr = next;
+                        i += 1;
+                    }
+                }
+                curr.next = prev;
+                (*middle_tail).next = Some(curr);
+                self.head = ptr::read(new_head);
+            }
+        }
+    }
 }
 
 impl Node {
