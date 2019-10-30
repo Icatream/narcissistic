@@ -20,9 +20,9 @@ impl NarcissisticIterator {
 
 impl Node {
     fn sum_power_of_each_num(&self, exp: u32, sum: usize) -> usize {
-        match self.next {
-            Some(ref node) => node.sum_power_of_each_num(exp, sum + self.val.pow(exp)),
-            None => sum + self.val.pow(exp),
+        match self.next() {
+            Some(node) => node.sum_power_of_each_num(exp, sum + (*self.value()).pow(exp)),
+            None => sum + (*self.value()).pow(exp),
         }
     }
 }
@@ -32,7 +32,7 @@ impl Iterator for NarcissisticIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let value = self.index.val;
+            let &value = self.index.value();
             if value == MAX {
                 return None;
             }
@@ -40,7 +40,7 @@ impl Iterator for NarcissisticIterator {
                 self.digit = self.digit + 1;
                 self.digit_mark = 10_usize.pow(self.digit);
             }
-            let sum = self.index.head.sum_power_of_each_num(self.digit, 0);
+            let sum = self.index.node().sum_power_of_each_num(self.digit, 0);
             self.index.plus_one();
             if sum == value {
                 return Some(sum);

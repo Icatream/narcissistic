@@ -25,7 +25,7 @@ impl Iterator for CachedNarcissisticIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let value = self.index.val;
+            let &value = self.index.value();
             if value == MAX {
                 return None;
             }
@@ -38,15 +38,15 @@ impl Iterator for CachedNarcissisticIterator {
                 }
             }
             let mut sum = 0;
-            let mut node = &self.index.head;
+            let mut node = self.index.node();
             loop {
-                match node.next {
-                    Some(ref next) => {
-                        sum = sum + self.cache[node.val];
+                match node.next() {
+                    Some(next) => {
+                        sum = sum + self.cache[*node.value()];
                         node = next;
                     }
                     None => {
-                        sum = sum + self.cache[node.val];
+                        sum = sum + self.cache[*node.value()];
                         break;
                     }
                 }

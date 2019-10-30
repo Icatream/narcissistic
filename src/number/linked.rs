@@ -1,15 +1,16 @@
+use std::{mem, ptr};
 use std::borrow::BorrowMut;
 
 #[derive(Debug)]
 pub struct LinkedNumber {
-    pub val: usize,
-    pub head: Node,
+    val: usize,
+    head: Node,
 }
 
 #[derive(Debug)]
 pub struct Node {
-    pub val: usize,
-    pub next: Option<Box<Node>>,
+    val: usize,
+    next: Option<Box<Node>>,
 }
 
 impl LinkedNumber {
@@ -22,6 +23,52 @@ impl LinkedNumber {
         self.val += 1;
         self.head.plus_one();
     }
+
+    pub fn value(&self) -> &usize {
+        &self.val
+    }
+
+    pub fn node(&self) -> &Node {
+        &self.head
+    }
+
+    pub fn calculate_value(&self) -> usize {
+        let mut sum = self.head.val;
+        let mut pow = 10;
+        let mut next = self.head.next.as_ref();
+        while let Some(node) = next {
+            sum += node.val * pow;
+            next = node.next.as_ref();
+            pow *= 10;
+        }
+        sum
+    }
+
+    pub fn reverse(&mut self) {
+        if let Some(second) = self.head.next.take() {
+            //let head = mem::replace(&mut self.head, Node::default());
+            let raw_head: *const _ = &self.head;
+            unsafe {
+                let head = ptr::read(raw_head);
+                let mut prev = Some(Box::new(head));
+                let mut curr = second;
+                loop {
+                    let next = curr.next.take();
+                    curr.next = prev;
+                    match next {
+                        Some(next_node) => {
+                            prev = Some(curr);
+                            curr = next_node;
+                        }
+                        None => break
+                    }
+                }
+                mem::replace(&mut self.head, *curr);
+            }
+            self.val = self.calculate_value();
+        }
+    }
+
 }
 
 impl Node {
@@ -67,107 +114,20 @@ impl Node {
         }
     }
 
-    pub fn _reverse(self) -> Box<Node> {
-        let mut prev = None;
-        let mut curr = Box::new(self);
-        loop {
-            let next = curr.next.take();
-            curr.next = prev;
-            match next {
-                Some(next_node) => {
-                    prev = Some(curr);
-                    curr = next_node;
-                }
-                None => return curr,
-            }
-        }
+    pub fn value(&self) -> &usize {
+        &self.val
     }
 
-    pub fn _reverse_at(self, k: usize) -> Box<Node> {
-        //let v = self.val as f64;
-        //let length = (v.log10() as usize) + 1;
-        //assert!(length > k, "reverse position can't be bigger than node length");
+    pub fn next(&self) -> Option<&Node> {
+        self.next.as_ref().map(|node| &**node)
+    }
+}
 
-        /*let mut first_node = Box::new(self);
-        match first_node.next.take() {
-            Some(mut second_node) => {
-                let mut first_node = Some(first_node);
-                let third = second_node.next.take();
-                second_node.next = first_node;
-                let first_part_tail = &mut second_node.next;
-                match third {
-                    Some(third_node) => {
-                        let mut prev = Some(second_node);
-                        let mut curr = third_node;
-                        let mut i: usize = 2;
-                        while i <= k {
-                            let next = curr.next.take();
-                            curr.next = prev;
-                            match next {
-                                Some(next_node) => {
-                                    prev = Some(curr);
-                                    curr = next_node;
-                                }
-                                None => return curr,
-                            }
-                            i += 1;
-                        }
-                        let head = prev.unwrap();
-                        prev = None;
-                        loop {
-                            let next = curr.next.take();
-                            curr.next = prev;
-                            match next {
-                                Some(next_node) => {
-                                    prev = Some(curr);
-                                    curr = next_node;
-                                }
-                                None => {
-                                    first_part_tail.unwrap().next = Some(curr);
-                                    return head;
-                                }
-                            }
-                        }
-                    }
-                    None => return second_node,
-                }
-            }
-            None => return first_node,
-        }*/
-        let mut prev = None;
-        let mut curr = Box::new(self);
-
-        let first_part_tail = &mut curr;
-
-        let mut i: usize = 0;
-        while i <= k {
-            let next = curr.next.take();
-            curr.next = prev;
-            match next {
-                Some(next_node) => {
-                    prev = Some(curr);
-                    curr = next_node;
-                }
-                None => return curr,
-            }
-            i += 1;
-        }
-
-        let head = prev.unwrap();
-        prev = None;
-        loop {
-            let next = curr.next.take();
-            curr.next = prev;
-            match next {
-                Some(next_node) => {
-                    prev = Some(curr);
-                    curr = next_node;
-                }
-                None => {
-                    first_part_tail.next = Some(curr);
-                    return head;
-                }
-            }
+impl Drop for LinkedNumber {
+    fn drop(&mut self) {
+        let mut curr_node = mem::replace(&mut self.head.next, None);
+        while let Some(mut node) = curr_node {
+            curr_node = mem::replace(&mut node.next, None)
         }
     }
 }
