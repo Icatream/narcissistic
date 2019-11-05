@@ -47,9 +47,9 @@ impl LinkedNumber {
     pub fn reverse(&mut self) {
         if let Some(second) = self.head.next.take() {
             //let head = mem::replace(&mut self.head, Node::default());
-            let raw_head: *const _ = &self.head;
+            //let raw_head: *const _ = ;
             unsafe {
-                let head = ptr::read(raw_head);
+                let head = ptr::read(&self.head);
                 let mut prev = Some(Box::new(head));
                 let mut curr = second;
                 while let Some(next) = curr.next.take() {
@@ -58,7 +58,7 @@ impl LinkedNumber {
                     curr = next;
                 }
                 curr.next = prev;
-                mem::replace(&mut self.head, *curr);
+                self.head = *curr;
             }
             self.val = self.calculate_value();
         }
