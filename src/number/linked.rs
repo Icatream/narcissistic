@@ -68,27 +68,37 @@ impl LinkedNumber {
         if let Some(second) = self.head.next.take() {
             //let raw_head: *const _ = &self.head;
             unsafe {
-                let head = mem::take(&mut self.head);
+                let head = ptr::read(&self.head);
                 let boxed_head = Box::new(head);
-                let head_ptr: *const Node = &*boxed_head;
+                let middle_tail: *const Node = &*boxed_head;
                 let mut prev = Some(boxed_head);
                 let mut curr = second;
-                let mut new_head = None;
-                let mut i = 0;
-                while let Some(next) = curr.next.take() {
+                let mut middle_head = None;
+                let mut i = 1;
+                loop {
+                    let next = curr.next.take();
                     if i == index {
-                        new_head = prev;
+                        middle_head = prev;
                     } else {
                         curr.next = prev;
                     }
-                    prev = Some(curr);
-                    curr = next;
-                    i += 1;
+                    match next {
+                        Some(next) => {
+                            prev = Some(curr);
+                            curr = next;
+                            i += 1;
+                        }
+                        None => break,
+                    }
                 }
-                curr.next = prev;
-                let ptr = head_ptr as *mut Node;
-                (*ptr).next = Some(curr);
-                self.head = *new_head.unwrap();
+                match middle_head {
+                    Some(head) => {
+                        let ptr = middle_tail as *mut Node;
+                        (*ptr).next = Some(curr);
+                        self.head = *head
+                    }
+                    None => self.head = *curr,
+                }
             }
             self.val = self.calculate_value();
         }
@@ -156,6 +166,7 @@ impl Drop for LinkedNumber {
     }
 }
 
+/*
 impl Default for Node {
     fn default() -> Self {
         Node {
@@ -163,4 +174,4 @@ impl Default for Node {
             next: None,
         }
     }
-}
+}*/
