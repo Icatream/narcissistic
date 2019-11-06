@@ -66,10 +66,12 @@ impl LinkedNumber {
 
     pub fn reverse_at(&mut self, index: usize) {
         if let Some(second) = self.head.next.take() {
-            let raw_head: *const _ = &self.head;
+            //let raw_head: *const _ = &self.head;
             unsafe {
-                let head = ptr::read(raw_head);
-                let mut prev = Some(Box::new(head));
+                let head = mem::take(&mut self.head);
+                let boxed_head = Box::new(head);
+                let head_ptr: *const Node = &*boxed_head;
+                let mut prev = Some(boxed_head);
                 let mut curr = second;
                 let mut new_head = None;
                 let mut i = 0;
@@ -84,13 +86,11 @@ impl LinkedNumber {
                     i += 1;
                 }
                 curr.next = prev;
-                println!("Curr: {:?}", curr);
-                println!("Head: {:?}", ptr::read(raw_head));
-                ptr::read(raw_head).next = Some(curr);
-                println!("Head: {:?}", ptr::read(raw_head));
-                println!("New_head: {:?}", new_head);
+                let ptr = head_ptr as *mut Node;
+                (*ptr).next = Some(curr);
                 self.head = *new_head.unwrap();
             }
+            self.val = self.calculate_value();
         }
     }
 }
@@ -152,6 +152,15 @@ impl Drop for LinkedNumber {
         let mut curr_node = mem::replace(&mut self.head.next, None);
         while let Some(mut node) = curr_node {
             curr_node = mem::replace(&mut node.next, None)
+        }
+    }
+}
+
+impl Default for Node {
+    fn default() -> Self {
+        Node {
+            val: 0,
+            next: None,
         }
     }
 }
