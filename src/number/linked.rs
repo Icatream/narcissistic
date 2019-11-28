@@ -24,10 +24,12 @@ impl LinkedNumber {
         self.head.plus_one();
     }
 
+    #[inline]
     pub fn value(&self) -> &usize {
         &self.val
     }
 
+    #[inline]
     pub fn node(&self) -> &Node {
         &self.head
     }
@@ -148,6 +150,7 @@ impl Node {
         }
     }
 
+    #[inline]
     pub fn value(&self) -> &usize {
         &self.val
     }
