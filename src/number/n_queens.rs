@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use itertools::Itertools;
 use std::fmt::{Debug, Display, Formatter, Result as FResult};
 use std::rc::Rc;
 
@@ -47,30 +47,39 @@ impl Display for Queen {
         let mut s = String::new();
         let len = self.0.len();
         if len != 0 {
-            let mut map = HashMap::with_capacity(len);
-            let mut iter = self.0.iter();
-            while let Some(ref point) = iter.next() {
-                let k = point.row * len + point.column;
-                map.insert(k, ());
-            }
+            // let mut map = HashMap::with_capacity(len);
+            // let mut iter = self.0.iter();
+            // while let Some(ref point) = iter.next() {
+            //     let k = point.row * len + point.column;
+            //     map.insert(k, ());
+            // }
+            // let mut i = 0;
+            // for _ in 0..len {
+            //     for _ in 0..len {
+            //         match map.get(&i) {
+            //             Some(_) => s.push_str("[Q]"),
+            //             None => s.push_str("[ ]"),
+            //         }
+            //         i += 1;
+            //     }
+            //     s.push_str("\n");
+            // }
+            let mut iter = self.0.iter().map(|ref p| p.row * len + p.column).sorted();
+            let mut p_index = iter.next();
             let mut i = 0;
             for _ in 0..len {
                 for _ in 0..len {
-                    match map.get(&i) {
-                        Some(_) => s.push_str("[Q]"),
-                        None => s.push_str("[ ]"),
+                    match p_index {
+                        Some(p) if p == i => {
+                            s.push_str("[Q]");
+                            p_index = iter.next();
+                        }
+                        _ => s.push_str("[ ]"),
                     }
                     i += 1;
                 }
                 s.push_str("\n");
             }
-            // } else {
-            //     for _ in 0..len {
-            //         for _ in 0..len {
-            //             s.push_str("[ ]");
-            //         }
-            //         s.push_str("\n");
-            //     }
         }
         write!(f, "{}-Queens:\n{}", len, s)
     }
