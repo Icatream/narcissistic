@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use lazyonce::LazyOnce;
-use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter, Result as FResult};
 use std::rc::Rc;
 
@@ -48,26 +47,27 @@ impl Queen {
     }
 
     ///reverse at vertical axis
-    fn reverse(&self, len: usize) -> Self {
+    fn reverse(&self) -> Self {
+        let max = self.0.len() - 1;
         let vec = self
             .0
             .iter()
-            .map(|ref p| Point::new(p.row, len - p.column))
+            .map(|p| Point::new(p.row, max - p.column))
             .collect();
 
         Queen(vec)
     }
 
-    ///rotate 90° left
-    fn rotate(&self, len: usize) -> Self {
-        let middle = len as isize;
+    //rotate 90° left
+    fn rotate_left(&self) -> Self {
+        let middle = ((self.0.len() as f64) - 1f64) / 2f64;
         let vec = self
             .0
             .iter()
-            .map(|ref p| {
-                let r = middle - ((p.row * 2) as isize);
-                let c = middle - ((p.column * 2) as isize);
-                let (r, c) = (-1 * c, r);
+            .map(|p| {
+                let r = (p.row as f64) - middle;
+                let c = (p.column as f64) - middle;
+                let (r, c) = (-c, r);
                 let r = (middle + r) as usize;
                 let c = (middle + c) as usize;
                 Point::new(r, c)
@@ -77,7 +77,69 @@ impl Queen {
         Queen(vec)
     }
 
-    fn eq(&self, other: &Self, len: usize) -> bool {
+    //rotate 90° right
+    fn rotate_right(&self) -> Self {
+        let middle = ((self.0.len() as f64) - 1f64) / 2f64;
+        let vec = self
+            .0
+            .iter()
+            .map(|p| {
+                let r = (p.row as f64) - middle;
+                let c = (p.column as f64) - middle;
+                let (r, c) = (c, -r);
+                let r = (middle + r) as usize;
+                let c = (middle + c) as usize;
+                Point::new(r, c)
+            })
+            .collect();
+
+        Queen(vec)
+    }
+
+    //rotate 180°
+    fn rotate(&self) -> Self {
+        let middle = ((self.0.len() as f64) - 1f64) / 2f64;
+        let vec = self
+            .0
+            .iter()
+            .map(|p| {
+                let r = (p.row as f64) - middle;
+                let c = (p.column as f64) - middle;
+                let (r, c) = (c, r);
+                let r = (middle + r) as usize;
+                let c = (middle + c) as usize;
+                Point::new(r, c)
+            })
+            .collect();
+
+        Queen(vec)
+    }
+
+    fn rotate_oblique(&self) -> Self {
+        let middle = ((self.0.len() as f64) - 1f64) / 2f64;
+        let vec = self
+            .0
+            .iter()
+            .map(|p| {
+                let r = (p.row as f64) - middle;
+                let c = (p.column as f64) - middle;
+                let (r, c) = (-c, -r);
+                let r = (middle + r) as usize;
+                let c = (middle + c) as usize;
+                Point::new(r, c)
+            })
+            .collect();
+
+        Queen(vec)
+    }
+}
+
+impl PartialEq for Queen {
+    fn eq(&self, other: &Self) -> bool {
+        let len = self.0.len();
+        if len != other.0.len() {
+            return false;
+        }
         let mut iter1 = self.0.iter().map(|p| p.count(len)).sorted();
         let mut iter2 = other.0.iter().map(|p| p.count(len)).sorted();
         while let Some(c1) = iter1.next() {
@@ -93,6 +155,8 @@ impl Queen {
         }
     }
 }
+
+impl Eq for Queen {}
 
 impl Display for Queen {
     fn fmt(&self, f: &mut Formatter<'_>) -> FResult {
@@ -201,75 +265,77 @@ pub fn calc_queens(size: usize) -> Vec<Queen> {
     // vec
 }
 
-pub fn fundamental(vec: &Vec<Queen>, len: usize) -> Vec<Queen> {
-    let mut vec: Vec<TransformedQueen> = vec
-        .iter()
-        .map(|queen| {
-            let queen = (*queen).clone();
-            TransformedQueen::new(queen, len)
-        })
-        .sorted()
-        .collect();
-    vec.dedup();
+pub fn fundamental(vec: &Vec<Queen>) -> Vec<Queen> {
+    let mut iter = vec.iter().map(|queen| {
+        let queen = (*queen).clone();
+        TransformedQueen::new(queen)
+    });
 
-    unimplemented!()
+    let mut list: Vec<TransformedQueen> = Vec::with_capacity(vec.len());
+    while let Some(q) = iter.next() {
+        if !list.contains(&q) {
+            list.push(q);
+        }
+    }
+
+    list.into_iter().map(|q| q.queen).collect()
 }
 
 struct TransformedQueen {
-    len: usize,
     queen: Queen,
     reverse: LazyOnce<Queen>,
+    rotate_left: LazyOnce<Queen>,
+    rotate_right: LazyOnce<Queen>,
     rotate: LazyOnce<Queen>,
+    rotate_oblique: LazyOnce<Queen>,
 }
 
 impl TransformedQueen {
-    fn new(queen: Queen, len: usize) -> Self {
+    fn new(queen: Queen) -> Self {
         TransformedQueen {
-            len,
             queen,
             reverse: LazyOnce::new(),
+            rotate_left: LazyOnce::new(),
+            rotate_right: LazyOnce::new(),
             rotate: LazyOnce::new(),
+            rotate_oblique: LazyOnce::new(),
         }
     }
 
-    fn queen(&self) -> &Queen {
-        &self.queen
+    // fn queen(&self) -> &Queen {
+    //     &self.queen
+    // }
+
+    fn reverse(&self) -> &Queen {
+        self.reverse.get(|| self.queen.reverse())
     }
 
-    fn reversed(&self) -> &Queen {
-        self.reverse.get(|| self.queen.reverse(self.len))
+    fn rotate_left(&self) -> &Queen {
+        self.rotate_left.get(|| self.queen.rotate_left())
     }
 
-    fn rotated(&self) -> &Queen {
-        self.rotate.get(|| self.queen.rotate(self.len))
+    fn rotate_right(&self) -> &Queen {
+        self.rotate_right.get(|| self.queen.rotate_right())
     }
-}
 
-impl PartialOrd for TransformedQueen {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.len < other.len {
-            return Some(Ordering::Less);
-        } else if self.len > other.len {
-            return Some(Ordering::Greater);
-        }
+    fn rotate(&self) -> &Queen {
+        self.rotate.get(|| self.queen.rotate())
+    }
 
-        unimplemented!()
+    fn rotate_oblique(&self) -> &Queen {
+        self.rotate_oblique.get(|| self.queen.rotate_oblique())
     }
 }
 
 impl PartialEq for TransformedQueen {
     fn eq(&self, other: &Self) -> bool {
-        self.len == other.len
-            && (self.queen.eq(&other.queen, self.len)
-                || self.queen.eq(other.reversed(), self.len)
-                || self.queen.eq(other.rotated(), self.len))
+        self.queen.eq(&other.queen)
+            || self.queen.eq(other.reverse())
+            || self.queen.eq(other.rotate_left())
+            || self.queen.eq(other.rotate_right())
+            || self.queen.eq(other.rotate())
+            || self.queen.eq(other.rotate_oblique())
     }
 }
 
 impl Eq for TransformedQueen {}
-
-impl Ord for TransformedQueen {
-    fn cmp(&self, other: &Self) -> Ordering {
-        unimplemented!()
-    }
-}
