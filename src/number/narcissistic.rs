@@ -48,4 +48,3 @@ impl Iterator for NarcissisticIterator {
         }
     }
 }
-

@@ -1,7 +1,14 @@
 use narcissistic::number::n_queens;
+use std::env::args;
 
 fn main() {
-  let all = n_queens::calc_queens(5);
+  let n = args()
+    .skip(1)
+    .next()
+    .and_then(|s| s.parse::<usize>().ok())
+    .unwrap_or(5);
+
+  let all = n_queens::calc_queens(n);
   all.iter().for_each(|queen| {
     println!("{}", queen);
   });

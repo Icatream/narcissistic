@@ -1,5 +1,5 @@
-use std::{mem, ptr};
 use std::borrow::BorrowMut;
+use std::{mem, ptr};
 
 #[derive(Debug)]
 pub struct LinkedNumber {
@@ -116,10 +116,7 @@ impl Node {
             Node::new0(j, &mut head);
             head
         } else {
-            Node {
-                val: i,
-                next: None,
-            }
+            Node { val: i, next: None }
         }
     }
 
