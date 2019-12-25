@@ -29,7 +29,7 @@ impl Point {
         }
     }
 
-    fn count(&self, len: usize) -> usize {
+    fn score(&self, len: usize) -> usize {
         self.row * len + self.column
     }
 }
@@ -77,12 +77,9 @@ impl Queen {
             .0
             .iter()
             .map(|p| {
-                let r = (p.row as f64) - middle;
-                let c = (p.column as f64) - middle;
+                let (r, c) = point_to_float(p, middle);
                 let (r, c) = (-c, r);
-                let r = (middle + r) as usize;
-                let c = (middle + c) as usize;
-                Point::new(r, c)
+                float_to_point(r, c, middle)
             })
             .collect();
 
@@ -96,12 +93,9 @@ impl Queen {
             .0
             .iter()
             .map(|p| {
-                let r = (p.row as f64) - middle;
-                let c = (p.column as f64) - middle;
+                let (r, c) = point_to_float(p, middle);
                 let (r, c) = (c, -r);
-                let r = (middle + r) as usize;
-                let c = (middle + c) as usize;
-                Point::new(r, c)
+                float_to_point(r, c, middle)
             })
             .collect();
 
@@ -115,12 +109,9 @@ impl Queen {
             .0
             .iter()
             .map(|p| {
-                let r = (p.row as f64) - middle;
-                let c = (p.column as f64) - middle;
+                let (r, c) = point_to_float(p, middle);
                 let (r, c) = (-r, -c);
-                let r = (middle + r) as usize;
-                let c = (middle + c) as usize;
-                Point::new(r, c)
+                float_to_point(r, c, middle)
             })
             .collect();
 
@@ -134,12 +125,9 @@ impl Queen {
             .0
             .iter()
             .map(|p| {
-                let r = (p.row as f64) - middle;
-                let c = (p.column as f64) - middle;
+                let (r, c) = point_to_float(p, middle);
                 let (r, c) = (c, r);
-                let r = (middle + r) as usize;
-                let c = (middle + c) as usize;
-                Point::new(r, c)
+                float_to_point(r, c, middle)
             })
             .collect();
 
@@ -153,17 +141,26 @@ impl Queen {
             .0
             .iter()
             .map(|p| {
-                let r = (p.row as f64) - middle;
-                let c = (p.column as f64) - middle;
+                let (r, c) = point_to_float(p, middle);
                 let (r, c) = (-c, -r);
-                let r = (middle + r) as usize;
-                let c = (middle + c) as usize;
-                Point::new(r, c)
+                float_to_point(r, c, middle)
             })
             .collect();
 
         Queen(vec)
     }
+}
+
+#[inline]
+fn point_to_float(p: &Point, m: f64) -> (f64, f64) {
+    ((p.row as f64) - m, (p.column as f64) - m)
+}
+
+#[inline]
+fn float_to_point(r: f64, c: f64, m: f64) -> Point {
+    let r = (r + m) as usize;
+    let c = (c + m) as usize;
+    Point::new(r, c)
 }
 
 impl PartialEq for Queen {
@@ -172,8 +169,8 @@ impl PartialEq for Queen {
         if len != other.0.len() {
             return false;
         }
-        let mut iter1 = self.0.iter().map(|p| p.count(len)).sorted();
-        let mut iter2 = other.0.iter().map(|p| p.count(len)).sorted();
+        let mut iter1 = self.0.iter().map(|p| p.score(len)).sorted();
+        let mut iter2 = other.0.iter().map(|p| p.score(len)).sorted();
         while let Some(c1) = iter1.next() {
             let c2 = iter2.next();
             match c2 {
@@ -212,7 +209,7 @@ impl Display for Queen {
             //     }
             //     s.push_str("\n");
             // }
-            let mut iter = self.0.iter().map(|p| p.count(len)).sorted();
+            let mut iter = self.0.iter().map(|p| p.score(len)).sorted();
             let mut p_index = iter.next();
             let mut i = 0;
             for _ in 0..len {
@@ -297,7 +294,7 @@ pub fn calc_queens(size: usize) -> Vec<Queen> {
     // vec
 }
 
-struct TransformedQueen {
+struct VariantQueens {
     queen: Queen,
     reverse_vertical: LazyOnce<Queen>,
     reverse_level: LazyOnce<Queen>,
@@ -308,9 +305,9 @@ struct TransformedQueen {
     rotate_oblique_right: LazyOnce<Queen>,
 }
 
-impl TransformedQueen {
+impl VariantQueens {
     fn new(queen: Queen) -> Self {
-        TransformedQueen {
+        VariantQueens {
             queen,
             reverse_vertical: LazyOnce::new(),
             reverse_level: LazyOnce::new(),
@@ -357,7 +354,7 @@ impl TransformedQueen {
     }
 }
 
-impl PartialEq for TransformedQueen {
+impl PartialEq for VariantQueens {
     fn eq(&self, other: &Self) -> bool {
         self.queen.eq(&other.queen)
             || self.queen.eq(other.reverse_vertical())
@@ -370,15 +367,15 @@ impl PartialEq for TransformedQueen {
     }
 }
 
-impl Eq for TransformedQueen {}
+impl Eq for VariantQueens {}
 
 pub fn unique(vec: &Vec<Queen>) -> Vec<Queen> {
     let mut iter = vec.iter().map(|queen| {
         let queen = (*queen).clone();
-        TransformedQueen::new(queen)
+        VariantQueens::new(queen)
     });
 
-    let mut list: Vec<TransformedQueen> = Vec::with_capacity(vec.len());
+    let mut list: Vec<VariantQueens> = Vec::with_capacity(vec.len());
     while let Some(q) = iter.next() {
         if !list.contains(&q) {
             list.push(q);
