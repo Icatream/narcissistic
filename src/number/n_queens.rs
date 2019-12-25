@@ -47,12 +47,24 @@ impl Queen {
     }
 
     ///reverse at vertical axis
-    fn reverse(&self) -> Self {
+    fn reverse_vertical(&self) -> Self {
         let max = self.0.len() - 1;
         let vec = self
             .0
             .iter()
             .map(|p| Point::new(p.row, max - p.column))
+            .collect();
+
+        Queen(vec)
+    }
+
+    //reverse at level axis
+    fn reverse_level(&self) -> Self {
+        let max = self.0.len() - 1;
+        let vec = self
+            .0
+            .iter()
+            .map(|p| Point::new(max - p.row, p.column))
             .collect();
 
         Queen(vec)
@@ -97,7 +109,26 @@ impl Queen {
     }
 
     //rotate 180°
-    fn rotate(&self) -> Self {
+    fn rotate_half(&self) -> Self {
+        let middle = ((self.0.len() as f64) - 1f64) / 2f64;
+        let vec = self
+            .0
+            .iter()
+            .map(|p| {
+                let r = (p.row as f64) - middle;
+                let c = (p.column as f64) - middle;
+                let (r, c) = (-r, -c);
+                let r = (middle + r) as usize;
+                let c = (middle + c) as usize;
+                Point::new(r, c)
+            })
+            .collect();
+
+        Queen(vec)
+    }
+
+    //rotate oblique
+    fn rotate_oblique_right(&self) -> Self {
         let middle = ((self.0.len() as f64) - 1f64) / 2f64;
         let vec = self
             .0
@@ -115,7 +146,8 @@ impl Queen {
         Queen(vec)
     }
 
-    fn rotate_oblique(&self) -> Self {
+    //rotate oblique
+    fn rotate_oblique_left(&self) -> Self {
         let middle = ((self.0.len() as f64) - 1f64) / 2f64;
         let vec = self
             .0
@@ -265,7 +297,82 @@ pub fn calc_queens(size: usize) -> Vec<Queen> {
     // vec
 }
 
-pub fn fundamental(vec: &Vec<Queen>) -> Vec<Queen> {
+struct TransformedQueen {
+    queen: Queen,
+    reverse_vertical: LazyOnce<Queen>,
+    reverse_level: LazyOnce<Queen>,
+    rotate_left: LazyOnce<Queen>,
+    rotate_right: LazyOnce<Queen>,
+    rotate_half: LazyOnce<Queen>,
+    rotate_oblique_left: LazyOnce<Queen>,
+    rotate_oblique_right: LazyOnce<Queen>,
+}
+
+impl TransformedQueen {
+    fn new(queen: Queen) -> Self {
+        TransformedQueen {
+            queen,
+            reverse_vertical: LazyOnce::new(),
+            reverse_level: LazyOnce::new(),
+            rotate_left: LazyOnce::new(),
+            rotate_right: LazyOnce::new(),
+            rotate_half: LazyOnce::new(),
+            rotate_oblique_left: LazyOnce::new(),
+            rotate_oblique_right: LazyOnce::new(),
+        }
+    }
+
+    // fn queen(&self) -> &Queen {
+    //     &self.queen
+    // }
+
+    fn reverse_vertical(&self) -> &Queen {
+        self.reverse_vertical.get(|| self.queen.reverse_vertical())
+    }
+
+    fn reverse_level(&self) -> &Queen {
+        self.reverse_level.get(|| self.queen.reverse_level())
+    }
+
+    fn rotate_left(&self) -> &Queen {
+        self.rotate_left.get(|| self.queen.rotate_left())
+    }
+
+    fn rotate_right(&self) -> &Queen {
+        self.rotate_right.get(|| self.queen.rotate_right())
+    }
+
+    fn rotate_half(&self) -> &Queen {
+        self.rotate_half.get(|| self.queen.rotate_half())
+    }
+
+    fn rotate_oblique_left(&self) -> &Queen {
+        self.rotate_oblique_left
+            .get(|| self.queen.rotate_oblique_left())
+    }
+
+    fn rotate_oblique_right(&self) -> &Queen {
+        self.rotate_oblique_right
+            .get(|| self.queen.rotate_oblique_right())
+    }
+}
+
+impl PartialEq for TransformedQueen {
+    fn eq(&self, other: &Self) -> bool {
+        self.queen.eq(&other.queen)
+            || self.queen.eq(other.reverse_vertical())
+            || self.queen.eq(other.reverse_level())
+            || self.queen.eq(other.rotate_left())
+            || self.queen.eq(other.rotate_right())
+            || self.queen.eq(other.rotate_half())
+            || self.queen.eq(other.rotate_oblique_left())
+            || self.queen.eq(other.rotate_oblique_right())
+    }
+}
+
+impl Eq for TransformedQueen {}
+
+pub fn unique(vec: &Vec<Queen>) -> Vec<Queen> {
     let mut iter = vec.iter().map(|queen| {
         let queen = (*queen).clone();
         TransformedQueen::new(queen)
@@ -280,62 +387,3 @@ pub fn fundamental(vec: &Vec<Queen>) -> Vec<Queen> {
 
     list.into_iter().map(|q| q.queen).collect()
 }
-
-struct TransformedQueen {
-    queen: Queen,
-    reverse: LazyOnce<Queen>,
-    rotate_left: LazyOnce<Queen>,
-    rotate_right: LazyOnce<Queen>,
-    rotate: LazyOnce<Queen>,
-    rotate_oblique: LazyOnce<Queen>,
-}
-
-impl TransformedQueen {
-    fn new(queen: Queen) -> Self {
-        TransformedQueen {
-            queen,
-            reverse: LazyOnce::new(),
-            rotate_left: LazyOnce::new(),
-            rotate_right: LazyOnce::new(),
-            rotate: LazyOnce::new(),
-            rotate_oblique: LazyOnce::new(),
-        }
-    }
-
-    // fn queen(&self) -> &Queen {
-    //     &self.queen
-    // }
-
-    fn reverse(&self) -> &Queen {
-        self.reverse.get(|| self.queen.reverse())
-    }
-
-    fn rotate_left(&self) -> &Queen {
-        self.rotate_left.get(|| self.queen.rotate_left())
-    }
-
-    fn rotate_right(&self) -> &Queen {
-        self.rotate_right.get(|| self.queen.rotate_right())
-    }
-
-    fn rotate(&self) -> &Queen {
-        self.rotate.get(|| self.queen.rotate())
-    }
-
-    fn rotate_oblique(&self) -> &Queen {
-        self.rotate_oblique.get(|| self.queen.rotate_oblique())
-    }
-}
-
-impl PartialEq for TransformedQueen {
-    fn eq(&self, other: &Self) -> bool {
-        self.queen.eq(&other.queen)
-            || self.queen.eq(other.reverse())
-            || self.queen.eq(other.rotate_left())
-            || self.queen.eq(other.rotate_right())
-            || self.queen.eq(other.rotate())
-            || self.queen.eq(other.rotate_oblique())
-    }
-}
-
-impl Eq for TransformedQueen {}

@@ -1,14 +1,14 @@
 use narcissistic::number::n_queens;
 
 fn main() {
-  let vec = n_queens::calc_queens(5);
-  vec.iter().for_each(|queen| {
+  let all = n_queens::calc_queens(5);
+  all.iter().for_each(|queen| {
     println!("{}", queen);
   });
-  let fudamental_vec = n_queens::fundamental(&vec);
-  println!("Fudamentaled:");
-  fudamental_vec.iter().for_each(|queen| {
+  let unique = n_queens::unique(&all);
+  println!("Unique:");
+  unique.iter().for_each(|queen| {
     println!("{}", queen);
   });
-  println!("Size {}, {}", vec.len(), fudamental_vec.len());
+  println!("All: {}, Unique: {}", all.len(), unique.len());
 }
