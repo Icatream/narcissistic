@@ -192,23 +192,6 @@ impl Display for Queen {
         let mut s = String::new();
         let len = self.0.len();
         if len != 0 {
-            // let mut map = HashMap::with_capacity(len);
-            // let mut iter = self.0.iter();
-            // while let Some(ref point) = iter.next() {
-            //     let k = point.row * len + point.column;
-            //     map.insert(k, ());
-            // }
-            // let mut i = 0;
-            // for _ in 0..len {
-            //     for _ in 0..len {
-            //         match map.get(&i) {
-            //             Some(_) => s.push_str("[Q]"),
-            //             None => s.push_str("[ ]"),
-            //         }
-            //         i += 1;
-            //     }
-            //     s.push_str("\n");
-            // }
             let mut iter = self.0.iter().map(|p| p.score(len)).sorted();
             let mut p_index = iter.next();
             let mut i = 0;
@@ -268,30 +251,6 @@ fn queens(board: Vec<Rc<Point>>, current_column: usize, max: usize) -> Vec<Queen
 
 pub fn calc_queens(size: usize) -> Vec<Queen> {
     queens(Vec::with_capacity(size), 0, size - 1)
-    // let half = (((size as f64) / 2f64).ceil()) as usize;
-
-    // let board = Vec::with_capacity(size);
-    // let current_column = 0;
-    // let max = size - 1;
-
-    // let mut vec = Vec::new();
-    // for row in 0..half {
-    //     let current = Point::new(row, current_column);
-    //     if no_conflicts(&board, &current) {
-    //         let mut board = board.clone();
-    //         board.push(Rc::new(current));
-    //         if current_column < max {
-    //             vec.append(&mut queens(board, current_column + 1, max));
-    //         } else {
-    //             let mut queen = Queen::with_capacity(max);
-    //             for rc_point in board {
-    //                 queen.0.push((*rc_point).clone());
-    //             }
-    //             vec.push(queen);
-    //         }
-    //     }
-    // }
-    // vec
 }
 
 struct VariantQueens {
